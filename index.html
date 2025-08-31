@@ -4,10 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Absensi BMT ABA</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="logo.png" type="image/png" />
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      background: #f7f9fb;
       margin: 0;
       padding: 0;
       text-align: center;
@@ -15,160 +17,198 @@
     header {
       background: #2e7d32;
       color: white;
-      padding: 1rem;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    header img { height: 60px; }
-    .container {
-      max-width: 500px;
-      margin: 1rem auto;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    header img {
+      height: 40px;
+      margin-right: 10px;
     }
-    video, canvas, img {
+    main {
+      padding: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: left;
+    }
+    select, input, button, textarea {
       width: 100%;
-      border-radius: 10px;
-      margin-top: 0.5rem;
-    }
-    select, input, button {
-      width: 100%;
-      margin: 0.5rem 0;
-      padding: 0.8rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 5px;
       border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
     }
     button {
+      margin-top: 15px;
       cursor: pointer;
-      border: none;
+      font-weight: bold;
+      background: #2e7d32;
       color: white;
-      font-weight: bold;
+      border: none;
     }
-    #captureBtn { background: #1976d2; }   /* biru */
-    #retryBtn { background: #f57c00; }     /* oranye */
-    #submitBtn { background: #2e7d32; }    /* hijau */
-    #statusMsg {
-      margin-top: 1rem;
-      font-weight: bold;
-      color: #2e7d32;
+    button.secondary {
+      background: #d32f2f;
+    }
+    video, canvas, img.preview {
+      margin-top: 10px;
+      width: 100%;
+      max-width: 320px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
     .hidden { display: none; }
   </style>
 </head>
 <body>
   <header>
-    <img src="assets/logo-192.png" alt="Logo BMT ABA" />
-    <h1>Absensi BMT ABA</h1>
-    <p id="clock"></p>
+    <img src="logo.png" alt="Logo" />
+    <h2>Absensi BMT ABA</h2>
   </header>
 
-  <div class="container" id="formContainer">
-    <form id="absenForm">
-      <!-- List karyawan -->
-      <select name="nama" required>
-        <option value="">-- Pilih Nama Karyawan --</option>
-        <option value="001 - Rizka Hadi">001 - Rizka Hadi</option>
-        <option value="002 - Adham">002 - Adham</option>
-        <option value="003 - Michel">003 - Michel</option>
-        <!-- tambahkan sesuai kebutuhan -->
+  <main id="form-section">
+    <form id="absensiForm">
+      <!-- Nama -->
+      <label for="nama">Nama Karyawan:</label>
+      <select id="nama" name="nama" required>
+        <option value="">-- Pilih Nama --</option>
+        <option value="Dwi Arie Y">Dwi Arie Y</option>
+        <option value="Suparto">Suparto</option>
+        <option value="Susmiyati">Susmiyati</option>
+        <option value="Citra P">Citra P</option>
+        <option value="Edy S">Edy S</option>
+        <option value="Fina Alviatur R">Fina Alviatur R</option>
+        <option value="Noval S">Noval S</option>
+        <option value="Zulfiana N A">Zulfiana N Adila</option>
       </select>
 
-      <select name="status" required>
-        <option value="">-- Pilih Status --</option>
+      <!-- Status -->
+      <label for="status">Status Kehadiran:</label>
+      <select id="status" name="status" required>
         <option value="Hadir">Hadir</option>
         <option value="Hadir Terlambat">Hadir Terlambat</option>
         <option value="Ijin Cuti">Ijin Cuti</option>
         <option value="Ijin Sakit">Ijin Sakit</option>
       </select>
 
-      <input type="text" name="alasan" placeholder="Alasan (opsional)" />
+      <!-- Alasan -->
+      <div id="alasanField" class="hidden">
+        <label for="alasan">Alasan:</label>
+        <textarea id="alasan" name="alasan"></textarea>
+      </div>
 
       <!-- Kamera -->
-      <video id="video" autoplay playsinline></video>
-      <canvas id="canvas" class="hidden"></canvas>
-      <img id="preview" class="hidden" />
+      <div id="cameraSection" class="hidden">
+        <video id="video" autoplay></video>
+        <button type="button" id="takePhoto">📸 Ambil Foto</button>
+        <canvas id="canvas" class="hidden"></canvas>
+        <img id="photoPreview" class="preview hidden" />
+        <button type="button" id="retakePhoto" class="secondary hidden">🔄 Ulangi Foto</button>
+      </div>
 
-      <button type="button" id="captureBtn">Ambil Foto</button>
-      <button type="button" id="retryBtn" class="hidden">Ulangi Foto</button>
-      <button type="submit" id="submitBtn" class="hidden">Kirim Absensi</button>
+      <button type="submit">✅ Submit Absensi</button>
     </form>
-    <div id="statusMsg"></div>
-  </div>
+  </main>
 
-  <div class="container hidden" id="thankyouContainer">
-    <h2>✅ Terima kasih telah melakukan absensi</h2>
-    <p>Data absensi Anda sudah tercatat.</p>
-  </div>
+  <main id="thanks-section" class="hidden">
+    <h2>Terima kasih telah melakukan absensi 🙏</h2>
+  </main>
 
   <script>
-    // Jam realtime
-    function updateClock() {
-      const now = new Date();
-      document.getElementById("clock").innerText = now.toLocaleString("id-ID");
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzgvMgep0Qv-V32LjCFYe8Yh-vBKMcXXzFkskw8lbyLr6aF6HZ47c4E5PdSd-ffLee4/exec";
 
-    // Kamera
+    const karyawan = {
+      "Dwi Arie Y": "ABA001",
+      "Suparto": "ABA002",
+      "Susmiyati": "ABA003",
+      "Citra P": "ABA004",
+      "Edy S": "ABA005",
+      "Fina Alviatur R": "ABA006",
+      "Noval S": "ABA007",
+      "Zulfiana N A": "ABA008"
+    };
+
+    const statusSelect = document.getElementById("status");
+    const alasanField = document.getElementById("alasanField");
+    const cameraSection = document.getElementById("cameraSection");
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
-    const preview = document.getElementById("preview");
-    const captureBtn = document.getElementById("captureBtn");
-    const retryBtn = document.getElementById("retryBtn");
-    const submitBtn = document.getElementById("submitBtn");
-    const context = canvas.getContext("2d");
+    const photoPreview = document.getElementById("photoPreview");
+    const takePhotoBtn = document.getElementById("takePhoto");
+    const retakePhotoBtn = document.getElementById("retakePhoto");
+
     let fotoData = "";
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => { video.srcObject = stream; })
-      .catch(err => { alert("Kamera tidak tersedia: " + err); });
+    // Show/hide fields
+    statusSelect.addEventListener("change", () => {
+      const status = statusSelect.value;
+      if (status === "Hadir") {
+        alasanField.classList.add("hidden");
+        cameraSection.classList.remove("hidden");
+        startCamera();
+      } else {
+        alasanField.classList.remove("hidden");
+        cameraSection.classList.add("hidden");
+        stopCamera();
+      }
+    });
 
-    captureBtn.addEventListener("click", () => {
+    function startCamera() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => console.error("Camera error:", err));
+    }
+    function stopCamera() {
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+      }
+    }
+
+    takePhotoBtn.addEventListener("click", () => {
+      const ctx = canvas.getContext("2d");
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0);
       fotoData = canvas.toDataURL("image/png");
-      preview.src = fotoData;
-
-      // tampilkan preview
+      photoPreview.src = fotoData;
+      photoPreview.classList.remove("hidden");
+      canvas.classList.add("hidden");
       video.classList.add("hidden");
-      preview.classList.remove("hidden");
-      retryBtn.classList.remove("hidden");
-      submitBtn.classList.remove("hidden");
-      captureBtn.classList.add("hidden");
+      takePhotoBtn.classList.add("hidden");
+      retakePhotoBtn.classList.remove("hidden");
     });
 
-    retryBtn.addEventListener("click", () => {
-      // ulangi foto
-      preview.classList.add("hidden");
-      video.classList.remove("hidden");
-      captureBtn.classList.remove("hidden");
-      retryBtn.classList.add("hidden");
-      submitBtn.classList.add("hidden");
+    retakePhotoBtn.addEventListener("click", () => {
       fotoData = "";
+      photoPreview.classList.add("hidden");
+      video.classList.remove("hidden");
+      takePhotoBtn.classList.remove("hidden");
+      retakePhotoBtn.classList.add("hidden");
+      startCamera();
     });
 
-    // Kirim absensi
-    document.getElementById("absenForm").addEventListener("submit", function(e) {
+    // Submit form
+    document.getElementById("absensiForm").addEventListener("submit", e => {
       e.preventDefault();
-      const formData = new FormData(this);
-      formData.append("foto", fotoData);
+      const nama = document.getElementById("nama").value;
+      const id = karyawan[nama] || "";
+      const status = statusSelect.value;
+      const alasan = document.getElementById("alasan").value;
 
-      document.getElementById("statusMsg").innerText = "Mengirim data...";
-
-      fetch("PASTE_BACKEND_APPSCRIPT_URL_HERE", {
+      fetch(scriptURL, {
         method: "POST",
-        body: formData
+        body: new URLSearchParams({ id, nama, status, alasan, foto: fotoData })
       })
-      .then(res => res.text())
-      .then(txt => {
-        document.getElementById("formContainer").classList.add("hidden");
-        document.getElementById("thankyouContainer").classList.remove("hidden");
-      })
-      .catch(err => {
-        document.getElementById("statusMsg").innerText = "Error: " + err;
-      });
+        .then(() => {
+          document.getElementById("form-section").classList.add("hidden");
+          document.getElementById("thanks-section").classList.remove("hidden");
+          stopCamera();
+        })
+        .catch(err => alert("Error: " + err));
     });
   </script>
 </body>
