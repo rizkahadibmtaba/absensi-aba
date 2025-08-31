@@ -43,10 +43,14 @@
           <label class="form-label">Keterangan:</label>
           <select id="keterangan" class="form-select" required>
             <option value="Hadir">Hadir</option>
-            <option value="Izin">Izin</option>
-            <option value="Sakit">Sakit</option>
+            <option value="Terlambat">Terlambat</option>
+            <option value="Izin">Izin (Cuti)</option>
+            <option value="Sakit">Izin (Sakit)</option>
           </select>
         </div>
+
+        <!-- Alasan jika sakit / izin -->
+        <textarea id="alasan" name="alasan" placeholder="Tuliskan alasan (contoh: sakit kepala, urusan keluarga, dsb)" style="display:none;"></textarea>
 
         <!-- Kamera -->
         <div id="cameraSection" class="mb-3 text-center">
@@ -68,13 +72,18 @@
 
   <script>
     // URL backend Apps Script otomatis
-    const backendUrl = "https://script.google.com/macros/s/AKfycbzXXXXX/exec"; 
+    const backendUrl = "https://script.google.com/macros/s/AKfycbzgvMgep0Qv-V32LjCFYe8Yh-vBKMcXXzFkskw8lbyLr6aF6HZ47c4E5PdSd-ffLee4/exec"; 
 
     // Daftar karyawan
     const karyawan = {
+      "Dwi Arie Y": "ABA001",
       "Suparto": "ABA002",
-      "Budi": "ABA003",
-      "Siti": "ABA004"
+      "Susmiyati": "ABA003",
+      "Citra P": "ABA004",
+      "Edy S": "ABA005",
+      "Fina Alviatur R": "ABA006",
+      "Noval S": "ABA007",
+      "Zulfiana N A": "ABA008"
     };
 
     const namaSelect = document.getElementById("namaKaryawan");
@@ -127,9 +136,11 @@
     function toggleCamera() {
       if (keteranganSelect.value === "Hadir") {
         cameraSection.classList.remove("d-none");
+        alasanField.style.display = "none";
         startCamera();
       } else {
         cameraSection.classList.add("d-none");
+        alasanField.style.display = "block";
         stopCamera();
         photoData = "";
       }
