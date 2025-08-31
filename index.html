@@ -76,6 +76,7 @@
 
     // Daftar karyawan
     const karyawan = {
+      "": "Pilih Nama",
       "Dwi Arie Y": "ABA001",
       "Suparto": "ABA002",
       "Susmiyati": "ABA003",
@@ -136,11 +137,9 @@
     function toggleCamera() {
       if (keteranganSelect.value === "Hadir") {
         cameraSection.classList.remove("d-none");
-        alasanField.style.display = "none";
         startCamera();
       } else {
         cameraSection.classList.add("d-none");
-        alasanField.style.display = "block";
         stopCamera();
         photoData = "";
       }
