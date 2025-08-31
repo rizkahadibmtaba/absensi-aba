@@ -58,8 +58,14 @@
           </select>
         </div>
 
-        <!-- Hidden ID -->
-        <input type="hidden" id="id" name="id">
+        <!-- Hidden ID
+        <input type="hidden" id="id" name="id"> -->
+
+        <!-- ID Karyawan Otomatis -->
+        <div class="mb-3">
+            <label for="id">ID Karyawan:</label>
+            <input type="text" id="id" name="id" placeholder="ID Karyawan" readonly required>
+        </div>
 
         <!-- Jenis Keterangan -->
         <div class="mb-3">
@@ -76,7 +82,7 @@
         <!-- Alasan (hidden default) -->
         <div class="mb-3" id="alasanWrapper" style="display:none;">
           <label for="alasan" class="form-label">Alasan:</label>
-          <textarea id="alasan" name="alasan" class="form-control"></textarea>
+          <textarea id="alasan" name="alasan" placeholder="Tuliskan alasan (contoh: Sakit Kepala, Urusan Keluarga, Dst)" class="form-control"></textarea>
         </div>
 
         <!-- Ambil Foto -->
