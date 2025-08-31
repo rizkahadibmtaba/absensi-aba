@@ -1,71 +1,159 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Absensi Karyawan BMT ABA</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Absensi BMT ABA</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/logo-192.png">
+  <!-- Manifest & Icons -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/logo-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/logo-512.png" />
+  <link rel="apple-touch-icon" href="assets/logo-192.png" />
 
-  <!-- PWA manifest -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- iOS support -->
-  <link rel="apple-touch-icon" href="assets/logo-192.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#2e7d32">
+  <!-- Styling -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: #2e7d32;
+      color: white;
+      padding: 1rem;
+    }
+    header img {
+      height: 60px;
+    }
+    h1 {
+      margin: 0.5rem 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 1rem auto;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    video, canvas {
+      width: 100%;
+      border-radius: 10px;
+    }
+    input, select, button {
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #2e7d32;
+      color: white;
+      cursor: pointer;
+      border: none;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #256228;
+    }
+    .status {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+  </style>
 </head>
 <body>
-  <h1>Absensi Karyawan BMT ABA</h1>
+  <header>
+    <img src="assets/logo-192.png" alt="Logo BMT ABA" />
+    <h1>Absensi BMT ABA</h1>
+    <p id="clock"></p>
+  </header>
 
-  <form id="absensiForm">
-    <label>ID Karyawan:</label><br>
-    <input type="text" id="id" name="id" required><br><br>
+  <div class="container">
+    <form id="absenForm">
+      <input type="text" name="id" placeholder="ID Karyawan" required />
+      <input type="text" name="nama" placeholder="Nama Lengkap" required />
 
-    <label>Nama:</label><br>
-    <input type="text" id="nama" name="nama" required><br><br>
+      <select name="status" required>
+        <option value="">-- Pilih Status --</option>
+        <option value="Hadir">Hadir</option>
+        <option value="Hadir Terlambat">Hadir Terlambat</option>
+        <option value="Ijin Cuti">Ijin Cuti</option>
+        <option value="Ijin Sakit">Ijin Sakit</option>
+      </select>
 
-    <label>Status Kehadiran:</label><br>
-    <select id="status" name="status" required>
-      <option value="Hadir">Hadir</option>
-      <option value="Terlambat">Terlambat</option>
-      <option value="Ijin Cuti">Ijin Cuti</option>
-      <option value="Ijin Sakit">Ijin Sakit</option>
-    </select><br><br>
+      <input type="text" name="alasan" placeholder="Alasan (opsional)" />
 
-    <label>Alasan (opsional):</label><br>
-    <input type="text" id="alasan" name="alasan"><br><br>
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas" style="display:none;"></canvas>
 
-    <button type="submit">Kirim Absensi</button>
-  </form>
+      <button type="button" id="captureBtn">Ambil Foto</button>
+      <button type="submit">Kirim Absensi</button>
+    </form>
 
-  <p id="result"></p>
+    <div class="status" id="statusMsg"></div>
+  </div>
 
   <script>
-    document.getElementById("absensiForm").addEventListener("submit", function(e) {
+    // Jam realtime
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("clock").innerText = now.toLocaleString("id-ID");
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Kamera
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const context = canvas.getContext("2d");
+    let fotoData = "";
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert("Kamera tidak tersedia: " + err);
+      });
+
+    document.getElementById("captureBtn").addEventListener("click", () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      fotoData = canvas.toDataURL("image/png");
+      alert("Foto berhasil diambil!");
+    });
+
+    // Kirim absensi
+    document.getElementById("absenForm").addEventListener("submit", function(e) {
       e.preventDefault();
 
       const formData = new FormData(this);
-      fetch("https://script.google.com/macros/s/AKfycbzgvMgep0Qv-V32LjCFYe8Yh-vBKMcXXzFkskw8lbyLr6aF6HZ47c4E5PdSd-ffLee4/exec", {  // ganti ke URL Web App Google Apps Script (doPost)
+      formData.append("foto", fotoData);
+
+      document.getElementById("statusMsg").innerText = "Mengirim data...";
+
+      fetch("https://script.google.com/macros/s/AKfycbzgvMgep0Qv-V32LjCFYe8Yh-vBKMcXXzFkskw8lbyLr6aF6HZ47c4E5PdSd-ffLee4/exec", {
         method: "POST",
         body: formData
       })
       .then(res => res.text())
-      .then(msg => {
-        document.getElementById("result").innerText = msg;
+      .then(txt => {
+        document.getElementById("statusMsg").innerText = txt;
+        document.getElementById("absenForm").reset();
+        fotoData = "";
       })
       .catch(err => {
-        document.getElementById("result").innerText = "Error: " + err;
+        document.getElementById("statusMsg").innerText = "Error: " + err;
       });
     });
-
-    // Register service worker
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(() => console.log("Service Worker registered"))
-        .catch(err => console.error("SW failed:", err));
-    }
   </script>
 </body>
 </html>
