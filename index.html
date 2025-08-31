@@ -4,14 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Absensi BMT ABA</title>
-
-  <!-- Manifest & Icons -->
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/logo-192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="assets/logo-512.png" />
-  <link rel="apple-touch-icon" href="assets/logo-192.png" />
-
-  <!-- Styling -->
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,12 +17,7 @@
       color: white;
       padding: 1rem;
     }
-    header img {
-      height: 60px;
-    }
-    h1 {
-      margin: 0.5rem 0;
-    }
+    header img { height: 60px; }
     .container {
       max-width: 500px;
       margin: 1rem auto;
@@ -39,11 +26,12 @@
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    video, canvas {
+    video, canvas, img {
       width: 100%;
       border-radius: 10px;
+      margin-top: 0.5rem;
     }
-    input, select, button {
+    select, input, button {
       width: 100%;
       margin: 0.5rem 0;
       padding: 0.8rem;
@@ -52,20 +40,20 @@
       border-radius: 6px;
     }
     button {
-      background: #2e7d32;
-      color: white;
       cursor: pointer;
       border: none;
-      transition: 0.3s;
+      color: white;
+      font-weight: bold;
     }
-    button:hover {
-      background: #256228;
-    }
-    .status {
+    #captureBtn { background: #1976d2; }   /* biru */
+    #retryBtn { background: #f57c00; }     /* oranye */
+    #submitBtn { background: #2e7d32; }    /* hijau */
+    #statusMsg {
       margin-top: 1rem;
       font-weight: bold;
       color: #2e7d32;
     }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -75,10 +63,16 @@
     <p id="clock"></p>
   </header>
 
-  <div class="container">
+  <div class="container" id="formContainer">
     <form id="absenForm">
-      <input type="text" name="id" placeholder="ID Karyawan" required />
-      <input type="text" name="nama" placeholder="Nama Lengkap" required />
+      <!-- List karyawan -->
+      <select name="nama" required>
+        <option value="">-- Pilih Nama Karyawan --</option>
+        <option value="001 - Rizka Hadi">001 - Rizka Hadi</option>
+        <option value="002 - Adham">002 - Adham</option>
+        <option value="003 - Michel">003 - Michel</option>
+        <!-- tambahkan sesuai kebutuhan -->
+      </select>
 
       <select name="status" required>
         <option value="">-- Pilih Status --</option>
@@ -90,14 +84,21 @@
 
       <input type="text" name="alasan" placeholder="Alasan (opsional)" />
 
+      <!-- Kamera -->
       <video id="video" autoplay playsinline></video>
-      <canvas id="canvas" style="display:none;"></canvas>
+      <canvas id="canvas" class="hidden"></canvas>
+      <img id="preview" class="hidden" />
 
       <button type="button" id="captureBtn">Ambil Foto</button>
-      <button type="submit">Kirim Absensi</button>
+      <button type="button" id="retryBtn" class="hidden">Ulangi Foto</button>
+      <button type="submit" id="submitBtn" class="hidden">Kirim Absensi</button>
     </form>
+    <div id="statusMsg"></div>
+  </div>
 
-    <div class="status" id="statusMsg"></div>
+  <div class="container hidden" id="thankyouContainer">
+    <h2>✅ Terima kasih telah melakukan absensi</h2>
+    <p>Data absensi Anda sudah tercatat.</p>
   </div>
 
   <script>
@@ -112,43 +113,58 @@
     // Kamera
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
+    const preview = document.getElementById("preview");
+    const captureBtn = document.getElementById("captureBtn");
+    const retryBtn = document.getElementById("retryBtn");
+    const submitBtn = document.getElementById("submitBtn");
     const context = canvas.getContext("2d");
     let fotoData = "";
 
     navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        video.srcObject = stream;
-      })
-      .catch(err => {
-        alert("Kamera tidak tersedia: " + err);
-      });
+      .then(stream => { video.srcObject = stream; })
+      .catch(err => { alert("Kamera tidak tersedia: " + err); });
 
-    document.getElementById("captureBtn").addEventListener("click", () => {
+    captureBtn.addEventListener("click", () => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       fotoData = canvas.toDataURL("image/png");
-      alert("Foto berhasil diambil!");
+      preview.src = fotoData;
+
+      // tampilkan preview
+      video.classList.add("hidden");
+      preview.classList.remove("hidden");
+      retryBtn.classList.remove("hidden");
+      submitBtn.classList.remove("hidden");
+      captureBtn.classList.add("hidden");
+    });
+
+    retryBtn.addEventListener("click", () => {
+      // ulangi foto
+      preview.classList.add("hidden");
+      video.classList.remove("hidden");
+      captureBtn.classList.remove("hidden");
+      retryBtn.classList.add("hidden");
+      submitBtn.classList.add("hidden");
+      fotoData = "";
     });
 
     // Kirim absensi
     document.getElementById("absenForm").addEventListener("submit", function(e) {
       e.preventDefault();
-
       const formData = new FormData(this);
       formData.append("foto", fotoData);
 
       document.getElementById("statusMsg").innerText = "Mengirim data...";
 
-      fetch("https://script.google.com/macros/s/AKfycbzgvMgep0Qv-V32LjCFYe8Yh-vBKMcXXzFkskw8lbyLr6aF6HZ47c4E5PdSd-ffLee4/exec", {
+      fetch("PASTE_BACKEND_APPSCRIPT_URL_HERE", {
         method: "POST",
         body: formData
       })
       .then(res => res.text())
       .then(txt => {
-        document.getElementById("statusMsg").innerText = txt;
-        document.getElementById("absenForm").reset();
-        fotoData = "";
+        document.getElementById("formContainer").classList.add("hidden");
+        document.getElementById("thankyouContainer").classList.remove("hidden");
       })
       .catch(err => {
         document.getElementById("statusMsg").innerText = "Error: " + err;
