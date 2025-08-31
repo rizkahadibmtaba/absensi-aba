@@ -63,8 +63,8 @@
 
         <!-- Jenis Keterangan -->
         <div class="mb-3">
-          <label for="keterangan" class="form-label">Keterangan:</label>
-          <select id="keterangan" name="keterangan" class="form-select" required>
+          <label for="status" class="form-label">Keterangan:</label>
+          <select id="status" name="status" class="form-select" required>
             <option value="">-- Pilih Keterangan --</option>
             <option value="Hadir">Hadir</option>
             <option value="Terlambat">Terlambat</option>
@@ -85,8 +85,8 @@
           <video id="video" autoplay playsinline></video>
           <canvas id="canvas" class="d-none"></canvas>
           <div class="mt-2">
-            <button type="button" class="btn btn-sm btn-primary" id="captureBtn">Ambil Foto</button>
-            <button type="button" class="btn btn-sm btn-secondary d-none" id="retakeBtn">Ulangi Foto</button>
+            <button type="button" class="btn btn-sm btn-primary w-100" id="captureBtn">Ambil Foto</button>
+            <button type="button" class="btn btn-sm btn-danger w-100 d-none" id="retakeBtn">Ulangi Foto</button>
           </div>
         </div>
 
@@ -118,7 +118,7 @@
     const form = document.getElementById("absensiForm");
     const namaSelect = document.getElementById("nama");
     const idInput = document.getElementById("id");
-    const keteranganSelect = document.getElementById("keterangan");
+    const keteranganSelect = document.getElementById("status");
     const alasanWrapper = document.getElementById("alasanWrapper");
     const alasanField = document.getElementById("alasan");
     const cameraSection = document.getElementById("cameraSection");
@@ -208,7 +208,7 @@
       const formData = new FormData();
       formData.append("nama", namaSelect.value);
       formData.append("id", idInput.value);
-      formData.append("keterangan", keteranganSelect.value);
+      formData.append("status", keteranganSelect.value);
       formData.append("alasan", alasanField.value);
       formData.append("foto", photoData);
 
