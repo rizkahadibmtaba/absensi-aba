@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Absensi Karyawan BMT ABA</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/logo-192.png">
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- iOS support -->
+  <link rel="apple-touch-icon" href="assets/logo-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#2e7d32">
+</head>
+<body>
+  <h1>Absensi Karyawan BMT ABA</h1>
+
+  <form id="absensiForm">
+    <label>ID Karyawan:</label><br>
+    <input type="text" id="id" name="id" required><br><br>
+
+    <label>Nama:</label><br>
+    <input type="text" id="nama" name="nama" required><br><br>
+
+    <label>Status Kehadiran:</label><br>
+    <select id="status" name="status" required>
+      <option value="Hadir">Hadir</option>
+      <option value="Terlambat">Terlambat</option>
+      <option value="Ijin Cuti">Ijin Cuti</option>
+      <option value="Ijin Sakit">Ijin Sakit</option>
+    </select><br><br>
+
+    <label>Alasan (opsional):</label><br>
+    <input type="text" id="alasan" name="alasan"><br><br>
+
+    <button type="submit">Kirim Absensi</button>
+  </form>
+
+  <p id="result"></p>
+
+  <script>
+    document.getElementById("absensiForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      fetch("https://script.google.com/macros/s/AKfycbzgvMgep0Qv-V32LjCFYe8Yh-vBKMcXXzFkskw8lbyLr6aF6HZ47c4E5PdSd-ffLee4/exec", {  // ganti ke URL Web App Google Apps Script (doPost)
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.text())
+      .then(msg => {
+        document.getElementById("result").innerText = msg;
+      })
+      .catch(err => {
+        document.getElementById("result").innerText = "Error: " + err;
+      });
+    });
+
+    // Register service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("Service Worker registered"))
+        .catch(err => console.error("SW failed:", err));
+    }
+  </script>
+</body>
+</html>
