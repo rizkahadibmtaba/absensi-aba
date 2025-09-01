@@ -216,6 +216,13 @@
     // Submit Form
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      // ✅ Foto wajib jika Hadir
+      if (keteranganSelect.value === "Hadir" && !photoData) {
+        alert("Silakan ambil foto terlebih dahulu sebelum mengirim absensi.");
+        return;
+      }
+
       submitBtn.textContent = "Mengirim...";
       submitBtn.disabled = true;
 
